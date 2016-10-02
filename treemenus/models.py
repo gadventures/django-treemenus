@@ -3,6 +3,8 @@ from itertools import chain
 from django.db import models
 from django.utils.translation import ugettext, ugettext_lazy as _
 
+APP_NAME = 'treemenus'
+
 
 class MenuItem(models.Model):
     parent = models.ForeignKey('self', verbose_name=_('parent'), null=True, blank=True)
@@ -19,6 +21,9 @@ class MenuItem(models.Model):
     def __unicode__(self):
         return self.caption
 
+    class Meta:
+        app_name = APP_NAME
+
     def save(self, force_insert=False, **kwargs):
         from treemenus.utils import clean_ranks
 
@@ -33,7 +38,7 @@ class MenuItem(models.Model):
             new_parent = self.parent
             old_parent = MenuItem.objects.get(pk=self.pk).parent
             if old_parent != new_parent:
-                #If so, we need to recalculate the new ranks for the item and its siblings (both old and new ones).
+                # If so, we need to recalculate the new ranks for the item and its siblings (both old and new ones).
                 if new_parent:
                     clean_ranks(new_parent.children())  # Clean ranks for new siblings
                     self.rank = new_parent.children().count()
@@ -131,3 +136,4 @@ class Menu(models.Model):
     class Meta:
         verbose_name = _('menu')
         verbose_name_plural = _('menus')
+        app_name = APP_NAME
